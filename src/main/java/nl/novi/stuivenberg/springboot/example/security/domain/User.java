@@ -7,7 +7,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "app_user")
+@Table(name = "app_user",uniqueConstraints = {
+            @UniqueConstraint(name="unique_username", columnNames={"username"}), //BvS
+            @UniqueConstraint(name="unique_email", columnNames={"email"})}) //BvS
 public class User {
 
     @Id

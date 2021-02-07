@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.Valid;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -33,9 +34,9 @@ import java.util.stream.Collectors;
 public class AuthorizationService {
 
     private static final String ROLE_NOT_FOUND_ERROR = "Error: Role is not found.";
-    private static final String EMPLOYEE_ROLE_ERROR = "Error: Role emp is not exclusively set ";
-    private static final String MANAGER_ROLE_ERROR = "Error: Role man is not exclusively set ";
     private static final String ADMIN_ROLE_ERROR = "Error: Role admin cannot be set";
+    private static final String MULTIPLE_ROLES_ERROR = "Error: Only one role is allowed";
+    private static final String ROLE_ERROR = "Error: role %s cannot be set";
 
     private UserRepository userRepository;
     private PasswordEncoder encoder;
@@ -131,7 +132,7 @@ public class AuthorizationService {
                         roles.add(coworkerRole);
                         break;
                     default:
-                        //BvS: Permit no other arbitrary role names in the SignupRequest.
+                        //BvS: Do not permit any other arbitrary role names in the SignupRequest.
                         throw new RuntimeException(ROLE_NOT_FOUND_ERROR);
                         //Debug
                         //BvS Disabled. This permits any arbitrary role name in the SignupRequest.
@@ -149,25 +150,30 @@ public class AuthorizationService {
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
 
-    @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<MessageResponse> registerEmployee(@Valid SignupRequest signUpRequest) {
-        //Allow exclusively role "emp"
+    public ResponseEntity<MessageResponse> registerWithSingleRole(@Valid SignupRequest signUpRequest,String abbrRole) {
         Set<String> roles = signUpRequest.getRole();
-        if (String.join("",roles).equalsIgnoreCase("emp")){
+        if (String.join("",roles).equalsIgnoreCase(abbrRole)){
             return registerUser(signUpRequest);
         }
-        throw new RuntimeException(EMPLOYEE_ROLE_ERROR);
+        throw new RuntimeException(ROLE_ERROR);
+    }
+
+    @PreAuthorize("hasRole('MANAGER')")
+    public ResponseEntity<MessageResponse> registerEmployee(@Valid SignupRequest signUpRequest) {
+        return registerWithSingleRole( signUpRequest,  "emp");
     }
 
     //@PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<MessageResponse> registerManager(@Valid SignupRequest signUpRequest) {
-        //Allow exclusively role "man"
-        Set<String> roles = signUpRequest.getRole();
-        if (String.join("",roles).equalsIgnoreCase("man")){
-            return registerUser(signUpRequest);
-        }
-        throw new RuntimeException(MANAGER_ROLE_ERROR);
+        return registerWithSingleRole( signUpRequest,  "man");
     }
+
+    public ResponseEntity<MessageResponse> registerCoworker(@Valid SignupRequest signUpRequest) {
+
+        signUpRequest.setRole(Collections.singleton("coworker"));
+        return registerWithSingleRole( signUpRequest,  "coworker");
+    }
+
 
     public ResponseEntity<MessageResponse> registerAdmin(@Valid SignupRequest signUpRequest) {
         Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)

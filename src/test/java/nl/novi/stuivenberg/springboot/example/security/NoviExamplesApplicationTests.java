@@ -9,11 +9,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 class NoviExamplesApplicationTests {
@@ -53,8 +54,29 @@ class NoviExamplesApplicationTests {
 
 		//Assert
 		assertNotNull(actual);
+	}
 
+	@Test
+	void testFindWithRole2(){
+		//Arrange
 
+		//Act
+		List<User> users = userRepository.findByRole(ERole.ROLE_ADMIN);
+		int actual = users.size();
+		users.forEach(u-> System.out.println(u.getUsername()));
+		//Assert
+		assertTrue(actual==0);
+	}
+
+	@Test
+	void testFindWithRole3(){
+		//Arrange
+
+		//Act
+		boolean actual = userRepository.existsByRole(ERole.ROLE_ADMIN);
+		boolean expected = true;
+		//Assert
+		assertEquals(actual,expected);
 	}
 
 }
