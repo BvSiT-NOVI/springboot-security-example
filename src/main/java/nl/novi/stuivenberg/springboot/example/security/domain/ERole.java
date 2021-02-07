@@ -7,7 +7,12 @@ package nl.novi.stuivenberg.springboot.example.security.domain;
  * https://www.w3schools.com/java/java_enums.asp
  */
 public enum ERole {
-    ROLE_USER,
-    ROLE_MODERATOR,
+    ROLE_COWORKER,
+    ROLE_MANAGER,
+    ROLE_EMPLOYEE,
     ROLE_ADMIN
 }
+
+/*    ROLE_USER,
+    ROLE_MODERATOR,
+    ROLE_ADMIN*/

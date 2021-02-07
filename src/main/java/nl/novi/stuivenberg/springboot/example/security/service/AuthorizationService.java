@@ -13,6 +13,7 @@ import nl.novi.stuivenberg.springboot.example.security.service.security.jwt.JwtU
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -32,6 +33,9 @@ import java.util.stream.Collectors;
 public class AuthorizationService {
 
     private static final String ROLE_NOT_FOUND_ERROR = "Error: Role is not found.";
+    private static final String EMPLOYEE_ROLE_ERROR = "Error: Role emp is not exclusively set ";
+    private static final String MANAGER_ROLE_ERROR = "Error: Role man is not exclusively set ";
+    private static final String ADMIN_ROLE_ERROR = "Error: Role admin cannot be set";
 
     private UserRepository userRepository;
     private PasswordEncoder encoder;
@@ -93,38 +97,93 @@ public class AuthorizationService {
         Set<String> strRoles = signUpRequest.getRole();
         Set<Role> roles = new HashSet<>();
 
+        //BvS Without passing a role a user is default enregistered with role COWORKER
         if (strRoles == null) {
-            Role userRole = roleRepository.findByName(ERole.ROLE_USER)
+            Role coworkerRole = roleRepository.findByName(ERole.ROLE_COWORKER)
                     .orElseThrow(() -> new RuntimeException(ROLE_NOT_FOUND_ERROR));
-            roles.add(userRole);
+            roles.add(coworkerRole);
         } else {
             strRoles.forEach(role -> {
                 switch (role) {
                     case "admin":
                         Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
                                 .orElseThrow(() -> new RuntimeException(ROLE_NOT_FOUND_ERROR));
+                        if (userRepository.existsByRolesContains(new Role(ERole.ROLE_ADMIN))){
+                            //Only one admin user can be created.
+                            throw new RuntimeException(ADMIN_ROLE_ERROR);
+                        }
                         roles.add(adminRole);
-
                         break;
-                    case "mod":
-                        Role modRole = roleRepository.findByName(ERole.ROLE_MODERATOR)
+                    case "emp":
+                        Role empRole = roleRepository.findByName(ERole.ROLE_EMPLOYEE)
                                 .orElseThrow(() -> new RuntimeException(ROLE_NOT_FOUND_ERROR));
-                        roles.add(modRole);
-
+                        roles.add(empRole);
+                        break;
+                    case "man":
+                        Role manRole = roleRepository.findByName(ERole.ROLE_MANAGER)
+                                .orElseThrow(() -> new RuntimeException(ROLE_NOT_FOUND_ERROR));
+                        roles.add(manRole);
+                        break;
+                    case "coworker":
+                    case "cow":
+                        Role coworkerRole = roleRepository.findByName(ERole.ROLE_COWORKER)
+                                .orElseThrow(() -> new RuntimeException(ROLE_NOT_FOUND_ERROR));
+                        roles.add(coworkerRole);
                         break;
                     default:
-                        Role userRole = roleRepository.findByName(ERole.ROLE_USER)
+                        //BvS: Permit no other arbitrary role names in the SignupRequest.
+                        throw new RuntimeException(ROLE_NOT_FOUND_ERROR);
+                        //Debug
+                        //BvS Disabled. This permits any arbitrary role name in the SignupRequest.
+                        /*
+                        Role cowRole = roleRepository.findByName(ERole.ROLE_COWORKER)
                                 .orElseThrow(() -> new RuntimeException(ROLE_NOT_FOUND_ERROR));
-                        roles.add(userRole);
+                        roles.add(cowRole);
+                         */
                 }
             });
         }
-
         user.setRoles(roles);
         userRepository.save(user);
 
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
+
+    @PreAuthorize("hasRole('MANAGER')")
+    public ResponseEntity<MessageResponse> registerEmployee(@Valid SignupRequest signUpRequest) {
+        //Allow exclusively role "emp"
+        Set<String> roles = signUpRequest.getRole();
+        if (String.join("",roles).equalsIgnoreCase("emp")){
+            return registerUser(signUpRequest);
+        }
+        throw new RuntimeException(EMPLOYEE_ROLE_ERROR);
+    }
+
+    //@PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<MessageResponse> registerManager(@Valid SignupRequest signUpRequest) {
+        //Allow exclusively role "man"
+        Set<String> roles = signUpRequest.getRole();
+        if (String.join("",roles).equalsIgnoreCase("man")){
+            return registerUser(signUpRequest);
+        }
+        throw new RuntimeException(MANAGER_ROLE_ERROR);
+    }
+
+    public ResponseEntity<MessageResponse> registerAdmin(@Valid SignupRequest signUpRequest) {
+        Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
+                .orElseThrow(() -> new RuntimeException(ROLE_NOT_FOUND_ERROR));
+        if (userRepository.existsByRolesContains(new Role(ERole.ROLE_ADMIN))){
+            //Only one admin user can be created.
+            throw new RuntimeException(ADMIN_ROLE_ERROR);
+        }
+        //Allow exclusively role "admin"
+        Set<String> roles = signUpRequest.getRole();
+        if (String.join("",roles).equalsIgnoreCase("admin")){
+            return registerUser(signUpRequest);
+        }
+        throw new RuntimeException(ADMIN_ROLE_ERROR);
+    }
+
 
     /**
      * Deze methode controleert de ontvangen username en wachtwoord. Het gebruikt hiervoor de

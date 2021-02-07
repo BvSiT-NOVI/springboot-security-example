@@ -42,4 +42,11 @@ public class AuthController {
         return authorizationService.registerUser(signUpRequest);
     }
 
+
+    @PostMapping("/signup/employee")
+    public ResponseEntity<MessageResponse> registerEmployee(@RequestBody SignupRequest signUpRequest) {
+        return authorizationService.registerEmployee(signUpRequest);
+    }
+
+
 }

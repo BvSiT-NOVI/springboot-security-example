@@ -24,14 +24,19 @@ public class TestController {
         return testService.generatePublicContent();
     }
 
-    @GetMapping("/user")
-    public String userAccess() {
-        return testService.generateUserContent();
+    @GetMapping("/coworker")
+    public String coworkerAccess() {
+        return testService.generateCoworkerContent();
     }
 
-    @GetMapping("/mod")
-    public String moderatorAccess() {
-        return testService.generateModContent();
+    @GetMapping("/employee")
+    public String employeeAccess() {
+        return testService.generateEmployeeContent();
+    }
+
+    @GetMapping("/manager")
+    public String managerAccess() {
+        return testService.generateManagerContent();
     }
 
     @GetMapping("/admin")
