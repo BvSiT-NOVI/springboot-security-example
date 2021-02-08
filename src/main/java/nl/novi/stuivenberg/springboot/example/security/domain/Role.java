@@ -15,8 +15,7 @@ public class Role {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(columnDefinition = "serial")
-    private long id;
+    private Long id;
 
     @Enumerated(EnumType.STRING)
     private ERole name;
@@ -28,11 +27,11 @@ public class Role {
         this.name = name;
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -43,5 +42,4 @@ public class Role {
     public void setName(ERole name) {
         this.name = name;
     }
-
 }

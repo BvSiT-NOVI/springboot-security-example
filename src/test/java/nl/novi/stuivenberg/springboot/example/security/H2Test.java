@@ -7,13 +7,13 @@ import java.sql.*;
 public class H2Test {
 
     //Error in path
-    @Test
+    //@Test
     public void testDatabaseNoMem() throws SQLException {
         testDatabase("jdbc:h2:test");
     }
 
     //OK
-    @Test
+    //@Test
     public void testDatabaseMem() throws SQLException {
         testDatabase("jdbc:h2:mem:test");
     }
