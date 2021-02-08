@@ -108,7 +108,7 @@ public class AuthorizationService {
                     case "admin":
                         Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
                                 .orElseThrow(() -> new RuntimeException(ROLE_NOT_FOUND_ERROR));
-                        if (userRepository.existsByRolesContains(new Role(ERole.ROLE_ADMIN))){
+                        if (userRepository.existsByRole(ERole.ROLE_ADMIN)){
                             //Only one admin user can be created.
                             throw new RuntimeException(ADMIN_ROLE_ERROR);
                         }
