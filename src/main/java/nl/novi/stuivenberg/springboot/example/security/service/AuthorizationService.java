@@ -34,8 +34,7 @@ import java.util.stream.Collectors;
 public class AuthorizationService {
 
     private static final String ROLE_NOT_FOUND_ERROR = "Error: Role is not found.";
-    private static final String ADMIN_ROLE_ERROR = "Error: Role admin cannot be set";
-    private static final String MULTIPLE_ROLES_ERROR = "Error: Only one role is allowed";
+    private static final String ADMIN_ROLE_ERROR = "Error: User with role admin exists already.";
     private static final String ROLE_ERROR = "Error: role %s cannot be set";
 
     private UserRepository userRepository;
@@ -169,25 +168,21 @@ public class AuthorizationService {
     }
 
     public ResponseEntity<MessageResponse> registerCoworker(@Valid SignupRequest signUpRequest) {
-
-        signUpRequest.setRole(Collections.singleton("coworker"));
-        return registerWithSingleRole( signUpRequest,  "coworker");
+        Set<String> roles = signUpRequest.getRole();
+        if (roles.size()==0 || String.join("",roles).equalsIgnoreCase("coworker")){
+            //Without passing a role a user is default enregistered with role COWORKER
+            return registerUser( signUpRequest);
+        }
+        throw new RuntimeException(ROLE_ERROR);
     }
 
-
     public ResponseEntity<MessageResponse> registerAdmin(@Valid SignupRequest signUpRequest) {
-        Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
-                .orElseThrow(() -> new RuntimeException(ROLE_NOT_FOUND_ERROR));
-        if (userRepository.existsByRolesContains(new Role(ERole.ROLE_ADMIN))){
+        if (userRepository.existsByRole(ERole.ROLE_ADMIN)){
             //Only one admin user can be created.
             throw new RuntimeException(ADMIN_ROLE_ERROR);
         }
-        //Allow exclusively role "admin"
-        Set<String> roles = signUpRequest.getRole();
-        if (String.join("",roles).equalsIgnoreCase("admin")){
-            return registerUser(signUpRequest);
-        }
-        throw new RuntimeException(ADMIN_ROLE_ERROR);
+        //User with role ADMIN can have all roles added
+        return registerUser(signUpRequest);
     }
 
 
