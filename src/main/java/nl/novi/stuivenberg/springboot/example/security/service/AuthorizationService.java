@@ -169,7 +169,7 @@ public class AuthorizationService {
 
     public ResponseEntity<MessageResponse> registerCoworker(@Valid SignupRequest signUpRequest) {
         Set<String> roles = signUpRequest.getRole();
-        if (roles.size()==0 || String.join("",roles).equalsIgnoreCase("coworker")){
+        if (roles==null || String.join("",roles).equalsIgnoreCase("coworker")){
             //Without passing a role a user is default enregistered with role COWORKER
             return registerUser( signUpRequest);
         }

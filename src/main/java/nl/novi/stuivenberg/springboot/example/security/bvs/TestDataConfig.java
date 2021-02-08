@@ -40,16 +40,17 @@ public class TestDataConfig implements CommandLineRunner {
     PasswordEncoder passwordEncoder;
 
     @Override
-    public void run(String... args)  {
-        logger.info("Running "+ this.getClass().getName());
-        createUser(new User("admin","admin@novi.nl","password"),ERole.ROLE_ADMIN);
-        createUser(new User("admin2","admin2@novi.nl","password"),ERole.ROLE_ADMIN,ERole.ROLE_MANAGER);
-        createUser(new User("user3","user3@novi.nl","password"),ERole.ROLE_COWORKER,ERole.ROLE_ADMIN);
-        createUser(new User("user4","user4@novi.nl","password"),ERole.ROLE_ADMIN);
-        for (int i = 0; i < 5; i++) {
-            createUser(createUser(new User("user","user@novi.nl","password"),i+5,ERole.ROLE_COWORKER));
+    public void run(String... args) {
+        logger.info("Running " + this.getClass().getName());
+        if (true) {
+            createUser(new User("admin", "admin@novi.nl", "password"), ERole.ROLE_ADMIN);
+            createUser(new User("admin2", "admin2@novi.nl", "password"), ERole.ROLE_ADMIN, ERole.ROLE_MANAGER);
+            createUser(new User("user3", "user3@novi.nl", "password"), ERole.ROLE_COWORKER, ERole.ROLE_ADMIN);
+            createUser(new User("user4", "user4@novi.nl", "password"), ERole.ROLE_ADMIN);
+            for (int i = 0; i < 5; i++) {
+                createUser(createUser(new User("user", "user@novi.nl", "password"), i + 5, ERole.ROLE_COWORKER));
+            }
         }
-
     }
 
     public User createUser(User user,ERole... roles){
