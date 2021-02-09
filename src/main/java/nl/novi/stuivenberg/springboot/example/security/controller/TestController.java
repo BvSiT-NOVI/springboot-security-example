@@ -2,10 +2,8 @@ package nl.novi.stuivenberg.springboot.example.security.controller;
 
 import nl.novi.stuivenberg.springboot.example.security.service.TestService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.data.repository.query.Param;
+import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -27,6 +25,11 @@ public class TestController {
     @GetMapping("/coworker")
     public String coworkerAccess() {
         return testService.generateCoworkerContent();
+    }
+
+    @GetMapping("/coworkers/{id}")
+    public String coworkerAccessSecured(@PathVariable Long id, @RequestHeader(name="Authorization") String token) {
+        return testService.generateCoworkerContent(id,token);
     }
 
     @GetMapping("/employee")

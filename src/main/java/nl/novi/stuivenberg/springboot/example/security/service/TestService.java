@@ -1,10 +1,14 @@
 package nl.novi.stuivenberg.springboot.example.security.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 @Service
 public class TestService {
+
+    @Autowired
+    AuthorizationService authorizationService;
 
     public String generatePublicContent() {
         return "Public Content.";
@@ -12,6 +16,11 @@ public class TestService {
 
     //TODO AnyRole = only with defined roles?
     @PreAuthorize("hasRole('COWORKER') or hasRole('MANAGER') or hasRole('EMPLOYEE') or hasRole('ADMIN') ")
+    public String generateCoworkerContent(Long id,String token) {
+        authorizationService.matches(id,token);
+        return generateCoworkerContent();
+    }
+
     public String generateCoworkerContent() {
         return "Coworker Content.";
     }

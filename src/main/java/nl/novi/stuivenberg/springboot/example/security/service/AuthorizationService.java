@@ -11,6 +11,7 @@ import nl.novi.stuivenberg.springboot.example.security.repository.RoleRepository
 import nl.novi.stuivenberg.springboot.example.security.repository.UserRepository;
 import nl.novi.stuivenberg.springboot.example.security.service.security.jwt.JwtUtils;
 
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -217,6 +218,15 @@ public class AuthorizationService {
                 userDetails.getUsername(),
                 userDetails.getEmail(),
                 roles));
+    }
+
+    public boolean matches(Long userId, String token){
+        //Find in DB a user with username as in jwt token and compare its id with @Param userId. Throws an exception on any error.
+        String userName = jwtUtils.getUserNameFromJwtToken(token);
+        if (userId==null || Strings.isEmpty(userName)) throw new RuntimeException(); //TODO BadRequestException
+        User user = userRepository.findByUsername(userName).orElseThrow(RuntimeException::new); //TODO BadRequestException
+        if (user.getId().equals(userId)) return true;
+        throw new RuntimeException();
     }
 
 }
