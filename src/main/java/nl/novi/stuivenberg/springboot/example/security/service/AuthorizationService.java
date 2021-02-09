@@ -24,7 +24,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.Valid;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -220,12 +219,12 @@ public class AuthorizationService {
                 roles));
     }
 
-    public boolean matches(Long userId, String token){
+    public void matches(Long userId, String token){
         //Find in DB a user with username as in jwt token and compare its id with @Param userId. Throws an exception on any error.
         String userName = jwtUtils.getUserNameFromJwtToken(token);
         if (userId==null || Strings.isEmpty(userName)) throw new RuntimeException(); //TODO BadRequestException
         User user = userRepository.findByUsername(userName).orElseThrow(RuntimeException::new); //TODO BadRequestException
-        if (user.getId().equals(userId)) return true;
+        if (user.getId().equals(userId)) return;
         throw new RuntimeException();
     }
 

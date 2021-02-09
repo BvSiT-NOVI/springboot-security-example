@@ -1,7 +1,10 @@
 package nl.novi.stuivenberg.springboot.example.security.service;
 
+import nl.novi.stuivenberg.springboot.example.security.domain.User;
+import nl.novi.stuivenberg.springboot.example.security.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -9,6 +12,9 @@ public class TestService {
 
     @Autowired
     AuthorizationService authorizationService;
+
+    @Autowired
+    UserRepository userRepository;
 
     public String generatePublicContent() {
         return "Public Content.";
@@ -41,6 +47,22 @@ public class TestService {
     }
 
 
+    //@PreAuthorize("hasRole('ADMIN')")
+
+    //@PreAuthorize("hasRole('ROLE_ADMIN') or #user.id == #userId")
+
+/*
+    //OK!
+    @PreAuthorize("#user.id == #userId")
+    public UserDetailsImpl getUser(@AuthenticationPrincipal UserDetailsImpl user,Long userId){
+        return user;
+    }
+*/
+
+    @PreAuthorize("(hasRole('ROLE_COWORKER') and #authUser.id == #userId) or (hasRole('ROLE_ADMIN'))")
+    public User getUser(@AuthenticationPrincipal UserDetailsImpl authUser,Long userId){
+        return userRepository.findById(authUser.getId()).orElseThrow(RuntimeException::new);
+    }
 
 
 /*
